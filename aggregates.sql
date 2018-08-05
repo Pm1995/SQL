@@ -36,3 +36,26 @@ on fac.facid=book.facid
 group by fac.facid,fac.name
 order by fac.facid;
 
+#Output the facility id that has the highest number of slots booked, again
+select facid,sum(slots) as totalslots
+from cd.bookings
+group by facid
+having sum(slots)=(select max(slots2) from 
+				   (select sum(slots) as slots2
+					from cd.bookings
+					group by facid) as slots2);
+
+
+
+
+#Produce a list of members, along with the number of hours they've booked in facilities, 
+#rounded to the nearest ten hours. Rank them by this rounded figure, producing output of first name, 
+#surname, rounded hours, rank. Sort by rank, surname, and first name.
+select firstname,surname,hours,rank() over (order by hours desc) rank from
+                                             (select firstname,surname,
+											  round(sum(slots)*0.5,-1) as hours
+											  from cd.bookings book
+											  inner join cd.members mem
+											  on book.memid=mem.memid
+											  group by firstname,surname
+											  order by hours desc,surname,firstname) as dic;
