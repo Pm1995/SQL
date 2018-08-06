@@ -59,3 +59,28 @@ select firstname,surname,hours,rank() over (order by hours desc) rank from
 											  on book.memid=mem.memid
 											  group by firstname,surname
 											  order by hours desc,surname,firstname) as dic;
+
+
+
+
+ #Classify facilities by value-using ntile() function 
+select name, case when class=1 then 'high'
+                  when class=2 then 'average'
+                   else 'low' end as revenue 
+from (select name, ntile(3) over (order by revenue desc) as class
+                                  from 
+                                 (select name,sum(case when memid=0 then slots*guestcost
+												   else slots*membercost end) as revenue
+								  from cd.bookings book
+								  inner join cd.facilities fac
+								  on book.facid=fac.facid
+								  group by name) as tic) as bic
+order by class,name ;
+
+
+
+#List each member's first booking after September 1st 2012
+select surname,firstname,mem.memid,starttime
+from cd.bookings book
+inner join cd.members mem
+on book.memid=mem.memid;
