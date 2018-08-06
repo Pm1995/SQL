@@ -1,3 +1,5 @@
+#from PostGre SQL Exercises 
+
 #Find the total revenue of each facility
 SELECT name,sum(revenue) as revenue from (select fac.name,case when book.memid=0 then book.slots*fac.guestcost
 							                       else book.slots*fac.membercost end as revenue
@@ -78,9 +80,43 @@ from (select name, ntile(3) over (order by revenue desc) as class
 order by class,name ;
 
 
+#Find the top three revenue generating facilities
+#method 1 
+select name,rank() over(order by revenue desc) rank from 
+                            (select name,sum(case when memid=0 then slots*guestcost
+							                       else slots*membercost end) as revenue
+							 from cd.facilities fac
+							 inner join cd.bookings book
+							 on fac.facid=book.facid
+							 group by name) as bic
+limit 3;
+
+#method 2 
+select name,rank from (select name,rank() over (order by sum(case when memid=0 then slots*guestcost
+															 else slots*membercost end)desc) rank
+					   from cd.facilities fac
+					   inner join cd.bookings book
+					   on fac.facid=book.facid
+					   group by name) as bic
+where rank<=3;
+
+
+#Produce a numbered list of members
+select rank() over (order by joindate) as row_number,firstname,surname
+from cd.members
+order by joindate;
+
+
+#Produce a list of member names, with each row containing the total member count
+select (select count(*) from cd.members),firstname,surname
+from cd.members;
+
 
 #List each member's first booking after September 1st 2012
-select surname,firstname,mem.memid,starttime
-from cd.bookings book
-inner join cd.members mem
-on book.memid=mem.memid;
+select surname,firstname,mem.memid,min(starttime)
+from cd.members mem
+inner join cd.bookings book
+on mem.memid=book.memid
+where starttime>='2012-09-01' 
+group by surname,firstname,mem.memid
+order by mem.memid;
