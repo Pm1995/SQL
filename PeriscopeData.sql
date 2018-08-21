@@ -126,7 +126,37 @@ select dt,substring_index(
     groupby dt;
 -------------------------------------------------------------------------------------------------------
 
+#Understanding SQL's Null
 
+#If you want to check if two columns are different
+select * from users 
+where has_adress is distinct from has_photo;
+
+#One handy way to filter rows is with a subselect. For example, if you wanted the users who did not have any packages
+select * from users 
+where id not in (select id from packages);
+
+#Sorting Nulls using coalesce()- converts null to zero 
+select name,points
+from users 
+order by coalesce(points,0) desc;
+
+#dividing by zero 
+select total_sales/nullif(num_users,0);
+
+#combining null to zero and divide by zero 
+select coalesce(total_sales/nullif(num_users,0),0);
+
+--------------------------------------------------------------------------------------------------------------------
+
+#SQL Joins For Data Analysis
+
+# most common joins we see:
+    #Inner Joins
+    #Left (and Right) Joins
+    #Self-Range Joins
+
+  
 
 
 
